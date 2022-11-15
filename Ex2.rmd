@@ -61,10 +61,17 @@ legend("center",legend=c("Spot", "Forward"),
        col=c("#0077ff", "#ff00a2"), lty= 1:1, cex=1)
 title("Yield curve at 2020")
 ```
-The plot above represent the spot and forward yield curve at July 2020. The spot yield is entirely 
-in the negative area of interest rate due to the APP of the ECB. Even the forward curve  is negative
-until the 8Y maturity
-
+The plot above represents the spot and forward yield curve in July 2020. The spot yield is entirely 
+in the negative area of interest rate due to the APP of the ECB. Even the forward curve is negative
+until the 8Y maturity. The curves are upward-sloping after 3Y, and the forward rate premium becomes higher as
+maturity increases. Because the agents were expecting the deepening of the recession of the covid and after
+they had expected a rise in economic acticity, the divergence between the two curves becomes wider as maturity increases.
+The forward rate is above the spot rate before 3Y maturity, suggesting that agents had expected a recession in the 3 years ahead. Indeed during a downturn,
+the agents expected that the central bank would lower the interest rates in the short term, while the opposite happened.
+The curves before the switch at 3Y maturity are downward sloping, suggesting an expected recession. 
+It seems reasonable because the covid had already broken out in July, and the prices incorporated 
+the expectation of future covid lockdowns. In addition, the ECB enlarged the APP program to face the pandemic in the EU countries, 
+lowering the yield curve in the short maturity.
 # Plot 2
 
 ```{r plot2, echo=FALSE, include=TRUE}
