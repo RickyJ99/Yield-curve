@@ -1,0 +1,86 @@
+---
+title: "Yield"
+output: pdf_document
+Author: Riccardo_DC
+---
+
+```{r setup, include=FALSE, echo= FALSE}
+library(ecb)
+library(xts)
+library(ggplot2)
+filter1 = list(startPeriod = "2020-06", endPeriod = "2021-06") #filtering time
+
+#import data for spot rates
+sp          <-  matrix(NA, nrow = 277, ncol = 10)
+keys        <-  "YC.B.U2.EUR.4F.G_N_A.SV_C_YM.SR_"
+colnamess   <- c()
+for (count in 1:10) {
+    keys_count          <- paste(keys, count, sep = "")
+    keys_count          <- paste(keys_count, "Y", sep = "")
+    data                <- get_data(key = keys_count,filter = filter1)
+    data$obstime        <- convert_dates(data$obstime)
+    colname             <- paste(count, "Y")
+    sp[ ,count]          <- data$obsvalue
+    colnamess           <- cbind(colnamess, colname)
+}
+colnames(sp)            <- colnamess
+#sp      <- xts(sp,order.by = data$obstime)
+
+#import data for forward price 
+fw          <-  matrix(NA, nrow = 277, ncol = 10)
+keys        <-  "YC.B.U2.EUR.4F.G_N_A.SV_C_YM.IF_"
+colnamess   <- c()
+for (count in 1:10) {
+    keys_count          <- paste(keys, count, sep = "")
+    keys_count          <- paste(keys_count, "Y", sep = "")
+    data                <- get_data(key = keys_count,filter = filter1)
+    data$obstime        <- convert_dates(data$obstime)
+    colname             <- paste(count, "Y")
+    fw[,count]          <- data$obsvalue
+    colnamess           <- cbind(colnamess, colname)
+}
+colnames(fw)            <- colnamess
+#fw      <- xts(fw,order.by = data$obstime)
+
+year <- 1:10
+data <- matrix(NA, nrow=10, ncol=2)
+data[ ,1]    <- sp[1,]
+data[ ,2]    <- fw[1,]
+
+colnames(data) <- c("Spot", "Forward")
+rownames(data) <- colnamess
+data <- data.frame(data)
+```
+# Plot
+```{r plot1, echo=FALSE, include=TRUE}
+plot(NULL, xlim = c(0, nrow(data)), ylim = c(-1,1), type = "n", xaxt = 'n', xlab='Maturity', ylab="Rate")
+lines( data$Spot, type = 'b', col = '#0077ff')
+lines(data$Forward, type = 'b', col = '#ff00a2')
+axis(1, at = 1:nrow(data), labels = rownames(data))
+legend("center",legend=c("Spot", "Forward"),
+       col=c("#0077ff", "#ff00a2"), lty= 1:1, cex=1)
+title("Yield curve at 2020")
+```
+The plot above represent the spot and forward yield curve at July 2020. The spot yield is entirely 
+in the negative area of interest rate due to the APP of the ECB. Even the forward curve  is negative
+until the 8Y maturity
+
+# Plot 2
+
+```{r plot2, echo=FALSE, include=TRUE}
+data[ ,1]    <- sp[277,]
+data[ ,2]    <- fw[277,]
+
+colnames(data) <- c("Spot", "Forward")
+rownames(data) <- colnamess
+data <- data.frame(data)
+
+#plot first
+plot(NULL, xlim = c(0, nrow(data)), ylim = c(-1,1), type = "n", xaxt = 'n', xlab='Maturity', ylab="Rate")
+lines( data$Spot, type = 'b', col = '#0077ff')
+lines(data$Forward, type = 'b', col = '#ff00a2')
+axis(1, at = 1:nrow(data), labels = rownames(data))
+legend("center",legend=c("Spot", "Forward"),
+       col=c("#0077ff", "#ff00a2"), lty= 1:1, cex=1)
+title("Yield curve at 2021")
+```
