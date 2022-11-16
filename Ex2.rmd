@@ -1,10 +1,9 @@
 ---
-title: "Yield"
+title: "Assignemnt 2: Term structure and expectations"
 output: pdf_document
 Author: Riccardo_DC
 ---
-
-```{r setup, include=FALSE, echo= FALSE}
+```{r setup2, include=FALSE, echo= FALSE}
 library(ecb)
 library(xts)
 library(ggplot2)
@@ -51,7 +50,7 @@ colnames(data) <- c("Spot", "Forward")
 rownames(data) <- colnamess
 data <- data.frame(data)
 ```
-# Plot
+# Plot yield curves 2020
 ```{r plot1, echo=FALSE, include=TRUE}
 plot(NULL, xlim = c(0, nrow(data)), ylim = c(-1,1), type = "n", xaxt = 'n', xlab='Maturity', ylab="Rate")
 lines( data$Spot, type = 'b', col = '#0077ff')
@@ -67,24 +66,26 @@ until the 8Y maturity. Indeed, In addition, the ECB enlarged the APP program to 
 lowering the yield curve in the short maturity.
 
 The curves are upward-sloping after 3Y, and the forward rate premium becomes higher as
-maturity increases.  Suggesting that agents the agents had been expecting the recovery of the consumption at pre-covid level,
+maturity increases. Suggesting that agents had been expecting the recovery of consumption at the pre-covid level,
 a tightening in the monetary policy, and probably higher inflation rates.
 
-Regarding the maturity before 3Y, the forward rate is above the spot rate and both have negative slopes. 
-Leading to the belief that the agents had been incorporated a recession in the 3 years ahead. As Engstrom and Sharpe (2018)
-find that a negative near-term spread may only predict recessions because it reflects 
+Regarding the maturity before 3Y, the forward rate is above the spot rate, and both have negative slopes. 
+Leading to the belief that the agents had incorporated a recession in the 3 years ahead. As Engstrom and Sharpe (2018)
+find that a near-term negative spread may only predict recessions because it reflects 
 the market's expectation that a contracting economy will induce the central bank to lower its policy rate.
-Indeed, the nominal interest rate are driven by:
-1. E(Inflation rates) -> inflation risk premium
-2. E(Monetary policy) -> real rate risk premium
+Indeed, the nominal interest rate is driven by the following:
+
+* $E(Inflation rates)$ -> inflation risk premium
+* $E(Monetary policy)$ -> real rate risk premium
+
 Hence, if investors see higher odds of a recession, the long-term inflation risk premium in Treasury bonds will fall.
-In contrast, an increase in the recession probability would increase the real rate risk premium assked by agents. 
-One interpretation can be that if investors see greater risk of recession, they will attribute higher value 
-to short-term assets that they can easily liquidate to finance spending on goods and services.
+In contrast, an increase in the recession probability would increase the real rate risk premium asked by agents. 
+One interpretation can be that if investors see a greater risk of recession, they will attribute a higher value 
+to short-term assets that they can quickly liquidate to finance spending on goods and services.
 It seems reasonable because the covid had already broken out in July, and the prices incorporated 
 the expectation of future covid measures that hinder consumption.
 
-# Plot 2
+# Plot yield curves 2021
 
 ```{r plot2, echo=FALSE, include=TRUE}
 data[ ,1]    <- sp[277,]
@@ -103,3 +104,15 @@ legend("center",legend=c("Spot", "Forward"),
        col=c("#0077ff", "#ff00a2"), lty= 1:1, cex=1)
 title("Yield curve at 2021")
 ```
+The plot above represents the forward and spot yield curves for different maturity quoted in July 2021.
+Compared to the previous plot, the forward yield curve is steeper. Thus the forward risk premium is higher for each 
+maturity than the last plot. A possible interpretation 
+is that the agents had expected higher inflation, an increase in monetary tightening, asking for
+a higher risk premium.
+Regarding the slopes of the two curves, the forward rate slope is positive, greater in absolute values compared to one year before
+ar reach maturity. While the slope of the spot yield curve is slightly negative until it comes to a minimum at 2Y, then it becomes positive.
+This behaviour can be explained by an increase in the odds of a recession in a short-term span, and this can justify the negative slopes and the negative
+forward risk premium before 2Y maturity.
+While after the 2Y maturity, the slopes and the forward risk premium are positive, this hints that agents believe in
+a positive state of the economy in the long run.
+
