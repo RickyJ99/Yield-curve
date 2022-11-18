@@ -88,8 +88,8 @@ the expectation of future covid measures that hinder consumption.
 # Plot yield curves 2022
 
 ```{r plot2, echo=FALSE, include=TRUE}
-data[ ,1]    <- sp[534,]
-data[ ,2]    <- fw[534,]
+data[ ,1]    <- sp[515,]
+data[ ,2]    <- fw[514,]
 
 colnames(data) <- c("Spot", "Forward")
 rownames(data) <- colnamess
@@ -104,16 +104,14 @@ legend("center",legend=c("Spot", "Forward"),
        col=c("#0077ff", "#ff00a2"), lty= 1:1, cex=1)
 title("Yield curve at 2021")
 ```
-The plot above represents the forward and spot yield curves for different maturity quoted in July 2021.
+The plot above represents the forward and spot yield curves for different maturity quoted in July 2022.
 Compared to the previous plot, the forward yield curve is steeper. Thus the forward risk premium is higher for each 
 maturity than the last plot. A possible interpretation 
 is that the agents had expected higher inflation, an increase in monetary tightening, asking for
 a higher risk premium.
 Regarding the slopes of the two curves, the forward rate slope is positive, greater in absolute values compared to one year before
-ar reach maturity. While the slope of the spot yield curve is slightly negative until it comes to a minimum at 2Y, then it becomes positive.
-This behaviour can be explained by an increase in the odds of a recession in a short-term span, and this can justify the negative slopes and the negative
-forward risk premium before 2Y maturity.
-While after the 2Y maturity, the slopes and the forward risk premium are positive, this hints that agents believe in
+ar each maturity. While the slope of the curves are both positive positive.
+The slopes and the forward risk premium are positive, this hints that agents believe in
 a positive state of the economy in the long run.
 
 
