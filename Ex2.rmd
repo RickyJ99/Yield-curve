@@ -3,6 +3,333 @@ title: "Assignemnt 2: Term structure and expectations"
 output: pdf_document
 Author: Riccardo_DC
 ---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(pandoc)
+```
+
+
+
+```{r p0, message=FALSE, echo=FALSE}
+# Clear the variables
+rm(list = ls())
+
+# Install packages
+packages <- c("matlib", "rmarkdown", "tinytex","plotly","rgl","knitr","pandoc")
+new.packages <- packages[!(packages %in% installed.packages()[, "Package"])]
+if (length(new.packages)) install.packages(new.packages)
+invisible(lapply(packages, library, character.only = TRUE))
+# Load packages
+library(matlib)
+library(scatterplot3d)
+library(plotly)
+library(rgl)
+library(knitr)
+options(digits = 15) 
+library(pandoc)
+```
+
+
+## Exercise 1:
+
+```{r p1, message=FALSE, echo=FALSE}
+# Clear the variables
+rm(list = ls())
+
+
+# Set the working directory to source file location with
+# setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd(getwd())
+
+# ~  (this character will be needed later for copypasting)
+phi <- 0.3
+matrix <- matrix(0,2,2, dimnames=list(c("h","l"),c("h","l")))
+matrix[1,] <- c(phi, (1-phi))
+matrix[2,] <- c((1-phi), phi)
+kable(matrix,   format = "pipe",
+                row.names=TRUE, 
+                col.names=c("h","l"))
+
+beta <- 0.96
+gamma <- 2
+h <- 1.05
+l <- 0.97
+```
+
+The exogenous endowment shock
+is a two states Markov process, defined as:
+
+$$\frac{\Omega_{t}}{\Omega_{t-1}}=\omega_{t}\quad 
+  with \; \omega_{t}\epsilon (h,l)$$
+
+With the following symmetric transition matrix:
+
+$$\Pi = \left[\begin{matrix}\phi & (1-\phi) \\ 
+                            (1-\phi) & \phi \\ \end{matrix}\right]$$
+
+Let $\beta = 0.96$, $\gamma=2$, $h=1.05$, $l=0.97$ and $\phi=0.3$.
+
+Knowing this, we cannot use the same 4-cases framework 
+The probability of finding ourselves in state h or state l now depends on the state of the economy in the
+previous period.
+
+Thus, we will have two different yield curves, conditional on the state
+of the Markov process we are starting with at time t. Let's then compute
+the yield curve for each of the two cases.
+
+## CASE 1: (state = h)
+The probability matrix (at times $t+1$ and $t+2$) will look like this:
+
+$$\left[\begin{matrix}\phi      & (\phi*\phi)+(1-\phi)*(1-\phi) \\ 
+                      (1-\phi)  & \phi*(1-\phi)+(1-\phi)*\phi\\ 
+        \end{matrix}\right]$$
+
+
+
+We can rewrite it as:
+
+
+$$\left[\begin{matrix}\phi      & 2\phi^{2}+1-2\phi\\ 
+                      (1-\phi)  & 2\phi(1-\phi)\\ 
+        \end{matrix}\right]$$
+
+The yield at time $t+1$ and $t+2$:
+
+$$y_{t+1}=-ln \left(\beta*\left(p_{1}(h)*(h)^{-\gamma} +
+                                p_{1}(l)*(l)^{-\gamma}
+              \right)\right)$$
+$$y_{t+2}=-\frac{1}{2}ln \left(\beta^{2} 
+                      \left(p_{1}(h) p_{2}(h) (h^{2})^{-\gamma} +
+                            p_{1}(l) p_{2}(l) (l^{2})^{-\gamma} +
+                            p_{1}(h) p_{2}(l) (hl)^{-\gamma} +
+                            p_{1}(l) p_{2}(h) (lh)^{-\gamma}
+              \right)\right)$$
+
+We wanted also to have a measure of the short-term interest rate in 
+period t. In the real world, this is the overnight interest rate, set
+by the Central Bank. To make an approximation, we used the same equation
+used for $y_{t+1}$ setting $p_{1}(h)=1$ since we know we are in $h$ at
+time $t$. Also, $\beta$ has exponent $0$ so it is equal to $1$.
+Thus, equation for our "short-term" interest rate is:
+
+$$y_{t}=-ln \left((h)^{-\gamma}\right)$$
+
+Let's look now at the code and the output:
+
+```{r p2, message=FALSE, echo=TRUE}
+
+#CASE 1: 
+#In this case we find ourselves in h at time t
+
+pi <- matrix(NA, 2,2)
+pi[1,]=c(phi, 2*(phi)^2+1-2*phi)
+pi[2,]=c(1-phi, (2*phi)-2*(phi)^2)
+
+yt_1=-log(beta*(pi[1,1]*(h)^(-gamma)+pi[2,1]*(l)^(-gamma)))
+yt_2=-0.5*log(((beta)^2)*(pi[1,1]*pi[1,2]*(h*h)^(-gamma) + 
+                          pi[2,1]*pi[2,2]*(l*l)^(-gamma) + 
+                          pi[1,1]*pi[2,2]*(h*l)^(-gamma) + 
+                          pi[2,1]*pi[1,2]*(l*h)^(-gamma)))
+
+yieldcurve=c(yt_1,yt_2)
+plot(yieldcurve, type="o",  main="Yield curve with t = h",
+                            xlab= "Time",
+                            ylab= "Yield",
+                            col="dark green")
+
+
+yt_0=-log((h)^(-gamma))
+yieldcurve=c(yt_0,yt_1,yt_2)
+plot(yieldcurve, type="o",  main="Yield curve with t = h",
+                            xlab= "Time",
+                            ylab= "Yield",
+                            col="dark green")
+
+yieldcurve * 100
+
+```
+
+In this case, the yield curve starts at about $9.75\%$, then it presents
+a downward slope going to $2.49\%$ in the second period (indicating the
+high probability of a recession in $t+1$) and then going up again to a yield
+of $4.68\%$ in $t+2$ (indicating the prediction of a recovery in the second
+period).
+
+We observe that even if the curve predicts a recovery in the long term, does
+not return to the first-period yield level. We believe this is because 
+in the starting period the state $h$ is certain, while in the second it is 
+only slightly more likely than a recession, thus the yield is lower.
+
+
+
+## CASE 2: (state = l)
+
+
+```{r p3, message=FALSE, echo=TRUE}
+
+#CASE 2: 
+#In this case we find ourselves in l at time t
+
+pi2 <- matrix(NA, 2,2)
+pi2[1,]=c(1-phi, (2*phi)-2*(phi)^2)
+pi2[2,]=c(phi, 2*(phi)^2+1-2*phi)
+
+yt_1l=-log(beta*(pi2[1,1]*(h)^(-gamma)+pi2[2,1]*(l)^(-gamma)))
+yt_2l=-0.5*log(((beta)^2)*(pi2[1,1]*pi2[1,2]*(h*h)^(-gamma) + 
+                          pi2[2,1]*pi2[2,2]*(l*l)^(-gamma) + 
+                          pi2[1,1]*pi2[2,2]*(h*l)^(-gamma) + 
+                          pi2[2,1]*pi2[1,2]*(l*h)^(-gamma)))
+
+yieldcurve_l=c(yt_1l,yt_2l)
+plot(yieldcurve_l, type="o",  main="Yield curve with t = l",
+                              xlab= "Time",
+                              ylab= "Yield",
+                              col="red")
+
+
+yt_0l=-log((l)^(-gamma))
+yieldcurve_l=c(yt_0l,yt_1l,yt_2l)
+plot(yieldcurve_l, type="o",  main= "Yield curve with t = l",
+                              xlab= "Time",
+                              ylab= "Yield",
+                              col="red")
+
+
+yieldcurve_l * 100
+```
+
+
+In this case, the yield curve starts at about $-6.09\%$, then it presents
+an upward slope going to $8.88\%$ in the second period (indicating the
+high probability of an expansion in $t+1$) and then going down again to a yield
+of $6.58\%$ in $t+2$ (indicating the prediction of a recession in the second
+period).
+
+We observe that even if the curve predicts a recession in the long term, it does
+not return to the first-period yield level. We believe this is because 
+in the starting period the state $l$ is certain, while in the second it is 
+only slightly more likely than an expansion (looking at our results, we have $58\%$
+probability of being in the low state), thus the yield is naturally higher.
+
+Note that in both cases the yield $y_{t}$ is practically a "fictional" one. In the first 
+case, the yield is much higher than what we would typically see in the real world economy, since
+we do not ever have the complete certainty of being in a high state of growth, thus the real yield is
+going to be much lower. In the second case, the yield is much lower than what we would observe. 
+Also, let's recall that in reality, these short-term interest rate are mandated by the CBs, not by
+the market itself.
+
+# Exercise 2
+
+```{r ex2, include=FALSE}
+library(ecb)
+library(xts)
+library(ggplot2)
+filter1 = list(startPeriod = "2020-06", endPeriod = "2021-06") #filtering time
+#import data for spot rates
+sp          <-  matrix(NA, nrow = 277, ncol = 10)
+keys        <-  "YC.B.U2.EUR.4F.G_N_A.SV_C_YM.SR_"
+colnamess   <- c()
+for (count in 1:10) {
+    keys_count          <- paste(keys, count, sep = "")
+    keys_count          <- paste(keys_count, "Y", sep = "")
+    data                <- get_data(key = keys_count,filter = filter1)
+    data$obstime        <- convert_dates(data$obstime)
+    colname             <- paste(count, "Y")
+    sp[ ,count]          <- data$obsvalue
+    colnamess           <- cbind(colnamess, colname)
+}
+colnames(sp)            <- colnamess
+#sp      <- xts(sp,order.by = data$obstime)
+#import data for forward price 
+fw          <-  matrix(NA, nrow = 277, ncol = 10)
+keys        <-  "YC.B.U2.EUR.4F.G_N_A.SV_C_YM.IF_"
+colnamess   <- c()
+for (count in 1:10) {
+    keys_count          <- paste(keys, count, sep = "")
+    keys_count          <- paste(keys_count, "Y", sep = "")
+    data                <- get_data(key = keys_count,filter = filter1)
+    data$obstime        <- convert_dates(data$obstime)
+    colname             <- paste(count, "Y")
+    fw[,count]          <- data$obsvalue
+    colnamess           <- cbind(colnamess, colname)
+}
+colnames(fw)            <- colnamess
+#fw      <- xts(fw,order.by = data$obstime)
+year <- 1:10
+data <- matrix(NA, nrow=10, ncol=2)
+data[ ,1]    <- sp[1,]
+data[ ,2]    <- fw[1,]
+colnames(data) <- c("Spot", "Forward")
+rownames(data) <- colnamess
+data <- data.frame(data)
+```
+# Plot yield curves 2020
+```{r plot1, echo=FALSE, include=TRUE}
+plot(NULL, xlim = c(0, nrow(data)), ylim = c(-1,1), type = "n", xaxt = 'n', xlab='Maturity', ylab="Rate")
+lines( data$Spot, type = 'b', col = '#0077ff')
+lines(data$Forward, type = 'b', col = '#ff00a2')
+axis(1, at = 1:nrow(data), labels = rownames(data))
+legend("topright",legend=c("Spot", "Forward"),
+       col=c("#0077ff", "#ff00a2"), lty= 1:1, cex=1)
+title("Yield curve at 2020")
+```
+
+The plot above represents the spot and forward yield curve in July 2020. The spot yield is entirely 
+in the negative area of interest rate due to the APP of the ECB. Even the forward curve is negative
+until the 8Y maturity. Indeed, In addition, the ECB enlarged the APP program to face the pandemic in the EU countries, 
+lowering the yield curve in the short maturity.
+
+The curves are upward-sloping after 3Y, and the forward rate premium becomes higher as
+maturity increases. Suggesting that agents had been expecting the recovery of consumption at the pre-covid level,
+a tightening in the monetary policy, and probably higher inflation rates.
+
+Regarding the maturity before 3Y, the forward rate is above the spot rate, and both have negative slopes. 
+Leading to the belief that the agents had incorporated a recession in the 3 years ahead. As Engstrom and Sharpe (2018)
+find that a near-term negative spread may only predict recessions because it reflects 
+the market's expectation that a contracting economy will induce the central bank to lower its policy rate.
+Indeed, the nominal interest rate is driven by the following:
+
+* $E(Inflation rates)$ -> inflation risk premium
+* $E(Monetary policy)$ -> real rate risk premium
+
+Hence, if investors see higher odds of a recession, the long-term inflation risk premium in Treasury bonds will fall.
+In contrast, an increase in the recession probability would increase the real rate risk premium asked by agents. 
+One interpretation can be that if investors see a greater risk of recession, they will attribute a higher value 
+to short-term assets that they can quickly liquidate to finance spending on goods and services.
+It seems reasonable because the covid had already broken out in July, and the prices incorporated 
+the expectation of future covid measures that hinder consumption.
+
+# Plot yield curves 2021
+
+```{r plot5, echo=FALSE, include=TRUE}
+data[ ,1]    <- sp[277,]
+data[ ,2]    <- fw[277,]
+colnames(data) <- c("Spot", "Forward")
+rownames(data) <- colnamess
+data <- data.frame(data)
+#plot first
+plot(NULL, xlim = c(0, nrow(data)), ylim = c(-1,1), type = "n", xaxt = 'n', xlab='Maturity', ylab="Rate")
+lines( data$Spot, type = 'b', col = '#0077ff')
+lines(data$Forward, type = 'b', col = '#ff00a2')
+axis(1, at = 1:nrow(data), labels = rownames(data))
+legend("topright",legend=c("Spot", "Forward"),
+       col=c("#0077ff", "#ff00a2"), lty= 1:1, cex=1)
+title("Yield curve at 2021")
+```
+
+The plot above represents the forward and spot yield curves for different maturity quoted in July 2021.
+Compared to the previous plot, the forward yield curve is steeper. Thus the forward risk premium is higher for each 
+maturity than the last plot. A possible interpretation 
+is that the agents had expected higher inflation, an increase in monetary tightening, asking for
+a higher risk premium.
+Regarding the slopes of the two curves, the forward rate slope is positive, greater in absolute values compared to one year before
+ar reach maturity. While the slope of the spot yield curve is slightly negative until it comes to a minimum at 2Y, then it becomes positive.
+This behaviour can be explained by an increase in the odds of a recession in a short-term span, and this can justify the negative slopes and the negative
+forward risk premium before 2Y maturity.
+While after the 2Y maturity, the slopes and the forward risk premium are positive, this hints that agents believe in
+a positive state of the economy in the long run.
+
 ```{r setup2, include=FALSE, echo= FALSE}
 library(ecb)
 library(xts)
@@ -51,7 +378,7 @@ rownames(data) <- colnamess
 data <- data.frame(data)
 ```
 # Plot yield curves 2021
-```{r plot1, echo=FALSE, include=TRUE}
+```{r plot10, echo=FALSE, include=TRUE}
 plot(NULL, xlim = c(0, nrow(data)), ylim = c(-1,1), type = "n", xaxt = 'n', xlab='Maturity', ylab="Rate")
 lines( data$Spot, type = 'b', col = '#0077ff')
 lines(data$Forward, type = 'b', col = '#ff00a2')
@@ -87,7 +414,7 @@ the expectation of future covid measures that hinder consumption.
 
 # Plot yield curves 2022
 
-```{r plot2, echo=FALSE, include=TRUE}
+```{r plot20, echo=FALSE, include=TRUE}
 data[ ,1]    <- sp[515,]
 data[ ,2]    <- fw[514,]
 
@@ -104,15 +431,11 @@ legend("center",legend=c("Spot", "Forward"),
        col=c("#0077ff", "#ff00a2"), lty= 1:1, cex=1)
 title("Yield curve at 2021")
 ```
+
 The plot above represents the forward and spot yield curves for different maturity quoted in July 2022.
 Compared to the previous plot, the forward yield curve is steeper. Thus the forward risk premium is higher for each 
-maturity than the last plot. A possible interpretation 
-is that the agents had expected higher inflation, an increase in monetary tightening, asking for
-a higher risk premium.
+maturity than the last plot. A possible interpretation is that the agents had expected higher inflation, an increase in monetary tightening, asking for a higher risk premium.
 Regarding the slopes of the two curves, the forward rate slope is positive, greater in absolute values compared to one year before
 ar each maturity. While the slope of the curves are both positive positive.
-The slopes and the forward risk premium are positive, this hints that agents believe in
-a positive state of the economy in the long run.
-
-
-
+The slopes and the forward risk premium are positive, this hints that agents believe in a positive state of the economy 
+in the long run.
