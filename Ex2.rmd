@@ -7,10 +7,10 @@ Author: Riccardo_DC
 library(ecb)
 library(xts)
 library(ggplot2)
-filter1 = list(startPeriod = "2021-07", endPeriod = "2022-07") #filtering time
+filter1 = list(startPeriod = "2020-07", endPeriod = "2022-07") #filtering time
 
 #import data for spot rates
-sp          <-  matrix(0, nrow = 280, ncol = 10)
+sp          <-  matrix(0, nrow = 535, ncol = 10)
 keys        <-  "YC.B.U2.EUR.4F.G_N_A.SV_C_YM.SR_"
 colnamess   <- c()
 for (count in 1:10) {
@@ -26,7 +26,7 @@ colnames(sp)            <- colnamess
 #sp      <- xts(sp,order.by = data$obstime)
 
 #import data for forward price 
-fw          <-  matrix(NA, nrow = 279, ncol = 10)
+fw          <-  matrix(NA, nrow = 534, ncol = 10)
 keys        <-  "YC.B.U2.EUR.4F.G_N_A.SV_C_YM.IF_"
 colnamess   <- c()
 for (count in 1:10) {
@@ -88,8 +88,8 @@ the expectation of future covid measures that hinder consumption.
 # Plot yield curves 2022
 
 ```{r plot2, echo=FALSE, include=TRUE}
-data[ ,1]    <- sp[279,]
-data[ ,2]    <- fw[279,]
+data[ ,1]    <- sp[534,]
+data[ ,2]    <- fw[534,]
 
 colnames(data) <- c("Spot", "Forward")
 rownames(data) <- colnamess
